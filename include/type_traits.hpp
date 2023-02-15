@@ -53,5 +53,20 @@ namespace ft {
     struct enable_if<true, type_T> {
         typedef type_T type;
     };
+    // --------------------------------- is_same -----------------------------------
+    template <class type_t, class type_Y> struct is_same : public false_type {};
+    template <class type_t> struct is_same<type_t, type_t> : public true_type {};
+    // --------------------------------- is_iterator -------------------------------
+    template <typename type_t, typename = void>
+    struct _is_iterator_base : public false_type {};
+
+    template <typename type_t>
+    struct _is_iterator_base<
+            type_t,
+            typename enable_if<!is_same<typename type_t::value_type, void>::value>::type
+    > : public true_type {};
+
+    template <typename type_t>
+    struct is_iterator : public ft::_is_iterator_base<type_t> {};
 }
 #endif //FT_CONTAINERS_TYPE_TRAITS_HPP

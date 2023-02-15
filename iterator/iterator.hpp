@@ -108,7 +108,7 @@ namespace ft {
             return *this;
         }
 
-        reverse_iterator &operator++(int) {
+        reverse_iterator operator++(int) {
             reverse_iterator _tmp = *this;
             --current;
             return _tmp;
@@ -119,7 +119,7 @@ namespace ft {
             return *this;
         }
 
-        reverse_iterator &operator--(int) {
+        reverse_iterator operator--(int) {
             reverse_iterator _tmp = *this;
             ++current;
             return _tmp;
@@ -237,10 +237,18 @@ namespace ft {
         return last - first;
     }
 
+    template<typename RandomAccessIterator>
+    inline typename ft::iterator_traits<RandomAccessIterator>::difference_type
+    _distance(RandomAccessIterator first, RandomAccessIterator last,
+              std::random_access_iterator_tag)
+    {
+        return last - first;
+    }
+
     template<class Iter>
     inline typename ft::iterator_traits<Iter>::iterator_category
     _iterator_category(const Iter&)
-    {return typename ft::iterator_traits<Iter>::iterator_category ();}
+    {return typename ft::iterator_traits<Iter>::iterator_category();}
 
 
     template<class InputIterator>

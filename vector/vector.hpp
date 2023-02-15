@@ -122,8 +122,9 @@ namespace ft {
 #endif
 // =========================================================================
         template<class InputIt>
-        vector(InputIt first, InputIt last,
-            const Allocator& alloc = Allocator()) :
+        explicit vector( typename ft::enable_if<not ft::is_integral<InputIt>::value, InputIt>::type first,
+                InputIt last,
+                const Allocator& alloc = Allocator()) :
         _allocated(0),
         _allocator(alloc),
         _begin(nullptr),
@@ -139,8 +140,12 @@ namespace ft {
             memory O(distance(first, last))
          */
         {
-            typedef typename ft::enable_if<ft::is_integral<InputIt>::value, InputIt>::type Integral;
-            M_initialize_dispatch(first, last, Integral());
+            difference_type size = ft::distance(first, last);
+            if (size > 0)
+            {
+                _init(size, false);
+                _copy(first, last, _begin);
+            }
         }
 // =========================================================================
         vector(const vector& other) :
@@ -252,7 +257,7 @@ namespace ft {
             _deallocate();
             difference_type size = ft::distance(first, last);
             _init(size, false);
-            _copy(first, last, _begin);
+            _copy(first.base(), last.base(), _begin);
         }
 // =========================================================================
         allocator_type  get_allocator() const
@@ -571,7 +576,7 @@ namespace ft {
 // =========================================================================
         iterator    insert(iterator pos,
                             size_type count,
-                            const_reference value)
+                            const T &value)
         /**
             inserts count copies of the value before pos
             @param pos iterator before which the content will be inserted
@@ -582,41 +587,57 @@ namespace ft {
         */
         {
             if (count > _S_max_size(_allocator) || count == 0)
-                return _end;
+                return pos;
             if (_begin == nullptr)
             {
                 _init(count, false);
                 _construct(_begin, count, value);
-                return _begin;
+                return iterator(_begin);
             }
             pointer ptr = const_cast<pointer>(pos.base());
             pointer start = _insert(ptr, count);
-//            difference_type movable = ft::min(_end - ptr, count);
             for (size_type i = 0; i < count; ++i)
                 start[i] = value;
             return iterator(start);
-//            for (size_type i = movable; i < count; ++i)
-//                _construct_at(start, value);
         }
 // =========================================================================
         template<class InputIt>
-        iterator    insert(iterator pos, InputIt first, InputIt last)
+        iterator    insert(iterator pos,
+                           typename ft::enable_if<not ft::is_integral<InputIt>::value, InputIt>::type first,
+                           InputIt last)
+        /**
+            inserts elements from range [first, last) before pos.
+            @tparam InputIt type iterator
+            @param pos  iterator before which the content will be inserted
+            @param first first iterator of inserted elements
+            @param last last iterator of inserted elements
+            @return first iterator after insert
+            time O(size() + distance(first, end))
+            memory O(capacity() + distance(first, end))
+        */
         {
             if (_begin == nullptr)
             {
                 assign(first, last);
-                return _begin;
+                return iterator(_begin);
             }
             difference_type size = ft::distance(first, last);
             pointer ptr = const_cast<pointer>(pos.base());
-            difference_type movable = ft::min(first - ptr, size);
+            difference_type movable = ft::min(first - pos, size);
             pointer begin = _insert(ptr, size);
             InputIt non_movable = _move(first, begin, movable);
             _copy(non_movable, last, begin + movable);
-            return begin;
+            return iterator(begin);
         }
 // =========================================================================
         iterator    erase(iterator pos)
+        /**
+            Removes the element at pos
+            @param pos iterator position element of container
+            @return Iterator following the last removed element
+            time O(1)
+            memory O(capasity() - 1)
+        */
         {
             if (pos == end())
                 return end();
@@ -625,6 +646,14 @@ namespace ft {
         }
 // =========================================================================
         iterator    erase(iterator first, iterator last)
+        /**
+            Removes the elements in the range [first, last).
+            @param first iterator position first element erased range from container
+            @param last iterator position last element erased range from container
+            @return Iterator following the last removed element.
+            time O(distance(first, last))
+            memory(capacity() - distance(first, last))
+        */
         {
             size_type count = ft::distance(first, last);
             if (count > _S_max_size(_allocator) || count == 0)
@@ -634,18 +663,36 @@ namespace ft {
         }
 // =========================================================================
         void    push_back(const T& value)
+        /**
+            Appends the given element value to the end of the container
+            @param value the value of the element to append
+            time O(1)
+            memory O(capacity() + 1)
+        */
         {
             _append();
             _construct_at(_end++, value);
         }
 // =========================================================================
         void    pop_back()
+        /**
+            Removes the last element of the container
+            time O(1)
+            memory O(capacity() - 1)
+        */
         {
             destroy_at(_end - 1);
             _pop();
         }
 // =========================================================================
         void    resize(size_type count)
+        /**
+            Resizes the container to contain count elements
+            additional default-inserted elements are appended
+            @param count new size of container
+            time O(count - size())
+            memory O(capacity())
+        */
         {
             if (count > _S_max_size(_allocator))
                 throw std::length_error("ft::vector::resize");
@@ -661,7 +708,15 @@ namespace ft {
             _end = _begin + count;
         }
 // =========================================================================
-        void    resize(size_type count, T value = T())
+        void    resize(size_type count, T value)
+        /**
+            Resizes the container to contain count elements
+            additional copies of value are appended
+            @param count new size of container
+            @param value the value to initialize the new elements with
+            time O(count - size())
+            memory O(capacity())
+        */
         {
             if (count > _S_max_size(_allocator))
                 throw std::length_error("ft::vector::resize");
@@ -678,13 +733,19 @@ namespace ft {
         }
 // =========================================================================
         void    swap(vector &other)
+        /**
+            Exchanges the contents and capacity of the container with those of other
+            @param other container to exchange the contents with
+            time O(1)
+            memory O(other.capacity())
+        */
         {
             std::swap(_allocated, other._allocated);
             std::swap(_allocator, other._allocator);
             std::swap(_begin, other._begin);
             std::swap(_end, other._end);
         }
-// =========================================================================
+// =================== Additional functions ================================
     private:
         void    _reallocate(size_type new_size)
         {
@@ -739,6 +800,19 @@ namespace ft {
                 _construct(_begin, size);
         }
 
+        template <class forward_iterator_type>
+        void    _copy(
+                typename ft::enable_if<ft::is_iterator<forward_iterator_type>::value, forward_iterator_type>::type first,
+                const forward_iterator_type &last, pointer dest)
+        {
+            while (first != last)
+            {
+                _construct_at(dest, *first);
+                ++dest;
+                ++first;
+            }
+        }
+
         void    _copy(const_pointer src_begin, const_pointer src_end, pointer dst)
         {
             size_type size = src_end - src_begin;
@@ -769,7 +843,9 @@ namespace ft {
 
         pointer _insert(pointer ptr, difference_type count=1)
         {
+            difference_type idx = ptr - _begin;
             _append(count);
+            ptr = _begin + idx;
             difference_type move_cnt = (_end - ptr) - count;
             if (move_cnt <= 0)
                 _copy(ptr, ptr + count, _end - ptr);
@@ -814,8 +890,10 @@ namespace ft {
 
         void    _alloc_more(size_type least)
         {
-            _reallocate(least);
-            _allocated = least;
+            if (least) {
+                _allocated = (_allocated * 2) > least ?  _allocated * 2 : least;
+                _reallocate(_allocated);
+            }
         }
 
         void    _append(difference_type count=1)
@@ -832,6 +910,7 @@ namespace ft {
             _move(ptr + count, ptr, move_cnt);
             destroy(_end - count, count);
             _end -= count;
+            _allocated -= count;
             return _begin + idx;
         }
 
@@ -871,43 +950,76 @@ namespace ft {
         {
             const std::size_t __diffmax = std::numeric_limits<std::ptrdiff_t>::max() / sizeof(T);
             const std::size_t __allocmax = alloc.max_size();
-            return std::min(__diffmax, __allocmax);
-        }
-
-        template<class InputInteger>
-        void
-        M_range_initialize(InputInteger first, InputInteger last,
-                           ft::input_iterator_tag)
-        {
-            try {
-                for (; first != last; ++first)
-                    push_back(*first);
-            } catch (...) {
-                clear();
-                throw;
-            }
-        }
-
-        template <class Integer>
-        void
-        M_initialize_dispatch(Integer n, Integer value, ft::true_type)
-        {
-            size_type s = static_cast<size_type>(n);
-            if (s < _S_max_size(_allocator))
-                _init(s, false);
-            else
-                throw (std::length_error("cannot create ft::vector larger than max_size()"));
-            _construct(_begin, s, static_cast<value_type>(value));
-        }
-
-        template <class InputIterator>
-        void
-        M_initialize_dispatch(InputIterator first, InputIterator last,
-                              ft::false_type)
-        {
-            M_range_initialize(first, last, ft::_iterator_category(first));
+            return ft::min(__diffmax, __allocmax);
         }
 
     };
+
+    // =================== Non-member Functions ================================
+
+    template <class T, class Alloc>
+    int vector_compare(
+            const ft::vector<T, Alloc> &lhs,
+            const ft::vector<T, Alloc> &rhs
+    )
+    {
+        if (lhs.size() < rhs.size())
+            return -1;
+        else if (lhs.size() > rhs.size())
+            return 1;
+        else
+        {
+            std::ptrdiff_t size = lhs.size();
+            while (size-- > 0)
+            {
+                if (*lhs != *rhs)
+                    return (*lhs > *rhs) * 2 - 1;
+            }
+            return 0;
+        }
+    }
+
+    template<class T, class Alloc>
+    bool    operator==( const ft::vector<T, Alloc> &lhs,
+                        const ft::vector<T, Alloc> &rhs)
+    {
+        return vector_compare<T, Alloc>(lhs, rhs) == 0;
+    }
+
+    template<class T, class Alloc>
+    bool    operator!=( const ft::vector<T, Alloc> &lhs,
+                        const ft::vector<T, Alloc> &rhs)
+    {
+        return vector_compare<T, Alloc>(lhs, rhs) != 0;
+    }
+
+    template<class T, class Alloc>
+    bool    operator>( const ft::vector<T, Alloc> &lhs,
+                        const ft::vector<T, Alloc> &rhs)
+    {
+        return vector_compare<T, Alloc>(lhs, rhs) > 0;
+    }
+
+    template<class T, class Alloc>
+    bool    operator>=( const ft::vector<T, Alloc> &lhs,
+                        const ft::vector<T, Alloc> &rhs)
+    {
+        return vector_compare<T, Alloc>(lhs, rhs) >= 0;
+    }
+
+    template<class T, class Alloc>
+    bool    operator<( const ft::vector<T, Alloc> &lhs,
+                        const ft::vector<T, Alloc> &rhs)
+    {
+        return vector_compare<T, Alloc>(lhs, rhs) < 0;
+    }
+
+    template<class T, class Alloc>
+    bool    operator<=( const ft::vector<T, Alloc> &lhs,
+                        const ft::vector<T, Alloc> &rhs)
+    {
+        return vector_compare<T, Alloc>(lhs, rhs) <= 0;
+    }
+
 }
 #endif //FT_CONTAINERS_VECTOR_H
