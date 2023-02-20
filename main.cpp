@@ -1,17 +1,14 @@
 #include <iostream>
 #include "vector.hpp"
 #include <vector>
+#include "stack/stack.hpp"
 
 int main()
 {
-    ft::vector<int> a;
+    ft::stack<int>  a;
+    ft::stack<int>  b;
 
-//    std::vector<int> b;
-    for (int i = 0; i < 100; ++i) {
-        a.resize(i);
-        for (int j = 0; j < a.size(); ++j)
-            std::cout << a[j] << " ";
-        std::cout << "\n";
-    }
+    std::cout << (a==b);
+
     return 0;
 }

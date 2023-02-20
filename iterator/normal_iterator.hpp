@@ -6,6 +6,7 @@
 #define FT_CONTAINERS_NORMAL_ITERATOR_HPP
 
 #include "iterator.hpp"
+#include "type_traits.hpp"
 
 namespace ft {
 
@@ -27,6 +28,12 @@ namespace ft {
         normal_iterator() : current(Iterator()) {}
 
         explicit normal_iterator(const Iterator &copy) : current(copy) {}
+
+        template <typename Iter>
+        normal_iterator(const normal_iterator<Iter,
+                        typename ft::enable_if<
+                                (ft::is_same<Iter, typename Container::pointer>::value),
+                                Container>::type> &i) : current(i.base()) {}
 
         // Forward iterator requirements
         reference operator*() const { return *current; }

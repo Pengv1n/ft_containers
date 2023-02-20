@@ -16,4 +16,4 @@ add_executable(ft_containers
         iterator/normal_iterator.cpp iterator/normal_iterator.hpp
         include/type_traits.hpp
         include/utils.hpp
-        )
+        stack/stack.cpp stack/stack.hpp)

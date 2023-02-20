@@ -161,7 +161,8 @@ namespace ft {
             memory O(other.size())
          */
         {
-            if (other.size() < _S_max_size(_allocator))
+            if (other.size() < _S_max_size(_allocator) &&
+            other.size() != 0)
             {
                 _init(other.size(), false);
                 _copy(other._begin, other._end, this->_begin);
@@ -970,10 +971,12 @@ namespace ft {
         else
         {
             std::ptrdiff_t size = lhs.size();
+            typename ft::vector<T, Alloc>::const_iterator l = lhs.begin();
+            typename ft::vector<T, Alloc>::const_iterator r = rhs.begin();
             while (size-- > 0)
             {
-                if (*lhs != *rhs)
-                    return (*lhs > *rhs) * 2 - 1;
+                if (*(l + size) != *(r + size))
+                    return (*(l + size) > *(r + size)) * 2 - 1;
             }
             return 0;
         }
