@@ -3,7 +3,12 @@ project(ft_containers)
 
 set(CMAKE_CXX_STANDARD 98)
 
-include_directories(include vector iterator)
+include_directories(include
+                    vector
+                    iterator
+                    pair
+                    map
+                    rb_tree)
 
 add_subdirectory(Google_tests)
 
@@ -16,4 +21,7 @@ add_executable(ft_containers
         iterator/normal_iterator.cpp iterator/normal_iterator.hpp
         include/type_traits.hpp
         include/utils.hpp
-        stack/stack.cpp stack/stack.hpp)
+        stack/stack.cpp stack/stack.hpp
+        map/map.cpp map/map.hpp
+        pair/pair.cpp pair/pair.hpp
+        rb_tree/rb_tree.cpp rb_tree/rb_tree.hpp)

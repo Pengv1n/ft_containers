@@ -14,3 +14,7 @@ target_link_libraries(TestsVector gtest gtest_main)
 add_executable(TestsStack TestStack.cpp)
 include_directories(TestsStack ../stack)
 target_link_libraries(TestsStack gtest gtest_main)
+
+add_executable(TestsRBTree TestRBTree.cpp)
+include_directories(TestsRBTree ../rb_tree)
+target_link_libraries(TestsRBTree gtest gtest_main)
