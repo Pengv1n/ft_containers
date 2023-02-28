@@ -8,8 +8,23 @@
 #include <functional>
 #include <iostream>
 #include "defs.hpp"
+#include "normal_iterator.hpp"
 
 namespace ft {
+
+    template <typename Tp>
+    struct rb_tree_iterator
+    {
+        typedef Tp  value_type;
+        typedef Tp& reference;
+        typedef Tp* pointer;
+
+        typedef ft::bidirectional_iterator_tag  iterator_category;
+        typedef std::ptrdiff_t  difference_type;
+
+        typedef rb_tree_iterator<Tp>    self;
+//        typedef rb
+    };
 
     template <
             class key_t,
@@ -40,17 +55,17 @@ namespace ft {
                     key(_key)
             {}
 
-            ~rb_node() {
-                if (this->left) {
-                    delete this->left;
-                }
-                if (this->right) {
-                    delete this->right;
-                }
-                if (key) {
-                    delete this->key;
-                }
-            }
+//            ~rb_node() {
+//                if (this->left) {
+//                    delete this->left;
+//                }
+//                if (this->right) {
+//                    delete this->right;
+//                }
+//                if (key) {
+//                    delete this->key;
+//                }
+//            }
 
             key_t   &get_key() const
             {
@@ -70,27 +85,15 @@ namespace ft {
         typedef typename rb_node::rb_color  rb_color;
         typedef rb_node* NodePtr;
 
-//    public:
-//
-//        rb_tree() :
-//            _root(nullptr),
-//            _begin(nullptr),
-//            _end(nullptr),
-//            _cmp(cmp_t()),
-//            alloc(allocator_t()),
-//            size(0)
-//        {}
-//    private:
-
         NodePtr root;
         NodePtr TNULL;
 
-        //        rb_node     *_root;
         NodePtr     _begin;
         NodePtr     _end;
         cmp_t       _cmp;
         allocator_t alloc;
         std::size_t size;
+
         void    init_NULLNode(NodePtr node, NodePtr parent)
         {
             node->key = nullptr;
@@ -187,7 +190,7 @@ namespace ft {
         }
 
         void    rbTransplant(NodePtr u, NodePtr v) {
-            if (u->parent == nullptr) {
+            if (u->parent == TNULL) {
                 this->root = v;
             } else if (u == u->parent->left) {
                 u->parent->left = v;
@@ -261,11 +264,11 @@ namespace ft {
             NodePtr z = TNULL;
             NodePtr x,y;
             while (node != TNULL) {
-                if (node->key == key) {
+                if (!compare(node->get_key(), key)) {
                     z = node;
                 }
 
-                if (node->key <= key) {
+                if (compare(node->get_key(), key) == -1) {
                     node = node->right;
                 } else {
                     node = node->left;
@@ -302,12 +305,44 @@ namespace ft {
                 y->left->parent = y;
                 y->color = z->color;
             }
+            delete z->key;
+            --size;
             delete z;
+            if (!size) {
+                this->root = TNULL;
+                return;
+            }
             if (y_original_color == rb_black) {
                 fixDelete(x);
             }
         }
+
+        void printHelper(NodePtr _root, std::string indent, bool last) {
+            // print the tree structure on the screen
+            if (_root != TNULL) {
+                std::cout<<indent;
+                if (last) {
+                    std::cout<<"R----";
+                    indent += "     ";
+                } else {
+                    std::cout<<"L----";
+                    indent += "|    ";
+                }
+
+                std::string sColor = _root->color?"BLACK":"RED";
+                std::cout<<_root->get_key()<<"("<<sColor<<")"<<std::endl;
+                printHelper(_root->left, indent, false);
+                printHelper(_root->right, indent, true);
+            }
+            // cout<<root->left->data<<endl;
+        }
     public:
+
+        void prettyPrint() {
+            if (root) {
+                printHelper(this->root, "", true);
+            }
+        }
 
         rb_tree() :
             size(0),
@@ -325,9 +360,32 @@ namespace ft {
 
         ~rb_tree() {
             if (root != TNULL)
-                delete root;
+                delete_branch(this->root);
             delete TNULL;
         }
+    private:
+        void    delete_branch(NodePtr d) {
+            if (d->left != TNULL) {
+                delete_branch(d->left);
+            }
+            if (d->right != TNULL) {
+                delete_branch(d->right);
+            }
+            if (d->key)
+                delete d->key;
+            delete d;
+            --size;
+        }
+
+        int compare(const key_t &lhs, const key_t &rhs) const
+        {
+            if (_cmp(lhs, rhs))
+                return -1;
+            else if (_cmp(rhs, lhs))
+                return 1;
+            return 0;
+        }
+    public:
 
         // Node -> Left Subtree -> Right Subtree
         void    preorder() {
@@ -485,20 +543,17 @@ namespace ft {
             return y;
         }
 
-        void    insert(int key) {
-            NodePtr node = new rb_node;
-            node->parent = nullptr;
-            node->key = key;
-            node->left = TNULL;
-            node->right = TNULL;
-            node->color = rb_red;
+        void    insert(key_t key) {
+            key_t   *n = new key_t(key);
+            NodePtr node = new rb_node(nullptr, TNULL, TNULL, rb_red, n);
+            ++size;
 
-            NodePtr y = nullptr;
+            NodePtr y = TNULL;
             NodePtr x = this->root;
 
             while (x != TNULL) {
                 y = x;
-                if (node->key < x->key) {
+                if (compare(node->get_key(), x->get_key()) == -1) {
                     x = x->left;
                 }
                 else {
@@ -509,25 +564,25 @@ namespace ft {
             node->parent = y;
             if (y == TNULL) {
                 this->root = node;
-            } else if (node->key < y->key) {
+            } else if (compare(node->get_key(), y->get_key()) == -1) {
                 y->left = node;
             } else {
                 y->right = node;
             }
 
-            if (node->parent == nullptr) {
+            if (node->parent == TNULL) {
                 node->color = rb_black;
                 return;
             }
 
-            if (node->parent->parent == nullptr) {
+            if (node->parent->parent == TNULL) {
                 return;
             }
 
             insert_fixup(node);
         }
 
-        void    deleteNode(int key) {
+        void    deleteNode(key_t key) {
             deleteNodeHelper(this->root, key);
         }
     };
