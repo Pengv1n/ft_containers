@@ -399,8 +399,54 @@ namespace ft {
             postOrderHelper(this->root);
         }
 
+        NodePtr searchKey(const key_t &k) const {
+            NodePtr ret = searchTreeHelper(this->root, k);
+            if (ret == TNULL)
+                return nullptr;
+            return ret;
+        }
+
         NodePtr searchTree(const key_t &k) const {
             return searchTreeHelper(this->root, k);
+        }
+
+        NodePtr lower_bound(const key_t &key) const {
+            NodePtr tmp = root;
+            NodePtr ret = root;
+            while (tmp != TNULL) {
+                if (compare(tmp->get_key(), key) >= 0) {
+                    ret = tmp;
+                    tmp = tmp->left;
+                } else {
+                    tmp = tmp->right;
+                }
+                if (compare(ret->get_key(), key) == 0) {
+                    return ret;
+                }
+            }
+            return compare(ret->get_key(), key) < 0 ? nullptr : ret;
+        }
+
+        NodePtr upper_bound(const key_t &key) const {
+            NodePtr tmp = root;
+            NodePtr ret = root;
+            while (tmp != TNULL) {
+                if (compare(tmp->get_key(), key) > 0) {
+                    ret = tmp;
+                    tmp = tmp->left;
+                } else {
+                    tmp = tmp->right;
+                }
+            }
+            return compare(ret->get_key(), key) <= 0 ? nullptr : ret;
+        }
+
+        cmp_t   get_comp() const {
+            return _cmp;
+        }
+
+        allocator_t get_alloc() const {
+            return alloc;
         }
 
         int find(const key_t &k) const {

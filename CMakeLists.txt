@@ -8,7 +8,8 @@ include_directories(include
                     iterator
                     pair
                     map
-                    rb_tree)
+                    rb_tree
+                    set)
 
 add_subdirectory(Google_tests)
 

@@ -5,12 +5,12 @@
 #include "pair.hpp"
 #include "rb_tree.hpp"
 #include "rb_iterator.hpp"
+#include "set.hpp"
 #include <set>
 
 int main()
 {
-    std::set<int>   a;
-    a.erase(a.begin());
-    
+    ft::set<int>   a;
+
     return 0;
 }

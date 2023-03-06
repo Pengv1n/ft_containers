@@ -96,6 +96,10 @@ namespace ft {
             return *this;
         }
 
+        allocator_type  get_allocator() const {
+            return tree.get_alloc();
+        }
+
         iterator    begin() {
             return iterator(tree.begin(), false);
         }
@@ -195,18 +199,64 @@ namespace ft {
         }
 
         iterator    find(const key_type &key) {
-            tree_node *ret = tree.searchTree(key);
-            if (ret == tree.end())
-                return iterator(ret, true);
+            tree_node *ret = tree.searchKey(key);
+            if (ret == nullptr)
+                return iterator(tree.end(), true);
             return iterator(ret, false);
         }
 
         const_iterator    find(const key_type &key) const {
-            tree_node *ret = tree.searchTree(key);
-            if (ret == tree.end())
-                return const_iterator(ret, true);
+            tree_node *ret = tree.searchKey(key);
+            if (ret == nullptr)
+                return const_iterator(tree.end(), true);
             return const_iterator(ret, false);
         }
+
+        ft::pair<iterator, iterator>    equal_range(const key_type &key) {
+            return ft::pair<iterator, iterator>(lower_bound(key), upper_bound(key));
+        }
+
+        ft::pair<const_iterator, const_iterator>    equal_range(const key_type &key) const {
+            return ft::pair<const_iterator, const_iterator>(lower_bound(key), upper_bound(key));
+        }
+
+        iterator    lower_bound(const key_type &key) {
+            tree_node *ret = tree.lower_bound(key);
+            if (ret == nullptr)
+                return iterator(tree.end(), true);
+            return iterator(ret, false);
+        }
+
+        const_iterator  lower_bound(const key_type &key) const {
+            tree_node *ret = tree.lower_bound(key);
+            if (ret == nullptr)
+                return const_iterator(tree.end(), true);
+            return const_iterator(ret, false);
+        }
+
+        iterator    upper_bound(const key_T &key) {
+            tree_node *ret = tree.upper_bound(key);
+            if (ret == nullptr)
+                return iterator(tree.end(), true);
+            return iterator(ret, false);
+        }
+
+        const_iterator  upper_bound(const key_T &key) const {
+            tree_node *ret = tree.upper_bound(key);
+            if (ret == nullptr)
+                return const_iterator(tree.end(), true);
+            return const_iterator(ret, false);
+        }
+
+        key_compare key_comp() const {
+            return tree.get_comp();
+        }
+
+        value_compare   value_comp() const {
+            return tree.get_comp();
+        }
+
+
     };
 
 }
