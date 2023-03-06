@@ -12,20 +12,6 @@
 
 namespace ft {
 
-    template <typename Tp>
-    struct rb_tree_iterator
-    {
-        typedef Tp  value_type;
-        typedef Tp& reference;
-        typedef Tp* pointer;
-
-        typedef ft::bidirectional_iterator_tag  iterator_category;
-        typedef std::ptrdiff_t  difference_type;
-
-        typedef rb_tree_iterator<Tp>    self;
-//        typedef rb
-    };
-
     template <
             class key_t,
             class cmp_t = std::less<key_t>,
@@ -92,7 +78,7 @@ namespace ft {
         NodePtr     _end;
         cmp_t       _cmp;
         allocator_t alloc;
-        std::size_t size;
+        std::size_t _size;
 
         void    init_NULLNode(NodePtr node, NodePtr parent)
         {
@@ -130,12 +116,12 @@ namespace ft {
             }
         }
 
-        NodePtr searchTreeHelper(NodePtr node, int key)
+        NodePtr searchTreeHelper(NodePtr node, const key_t &key)
         {
             if (node == TNULL || key == *(node->key))
                 return node;
 
-            if (key < *(node->key))
+            if (compare(key, node->get_key()) == -1)
                 return searchTreeHelper(node->left, key);
             return searchTreeHelper(node->right, key);
         }
@@ -260,12 +246,13 @@ namespace ft {
             x->color = rb_black;
         }
 
-        void    deleteNodeHelper(NodePtr node, key_t key) {
+        NodePtr deleteNodeHelper(NodePtr node, const key_t &key) {
             NodePtr z = TNULL;
             NodePtr x,y;
             while (node != TNULL) {
                 if (!compare(node->get_key(), key)) {
                     z = node;
+                    break;
                 }
 
                 if (compare(node->get_key(), key) == -1) {
@@ -277,7 +264,7 @@ namespace ft {
 
             if (z == TNULL) {
                 std::cout << "Couldn't find key in the tree" << std::endl;
-                return;
+                return z;
             }
 
             y = z;
@@ -305,16 +292,18 @@ namespace ft {
                 y->left->parent = y;
                 y->color = z->color;
             }
+            NodePtr ret = successor(z);
             delete z->key;
-            --size;
+            --_size;
             delete z;
-            if (!size) {
+            if (!_size) {
                 this->root = TNULL;
-                return;
+                return ret;
             }
             if (y_original_color == rb_black) {
                 fixDelete(x);
             }
+            return ret;
         }
 
         void printHelper(NodePtr _root, std::string indent, bool last) {
@@ -345,16 +334,24 @@ namespace ft {
         }
 
         rb_tree() :
-            size(0),
+            _size(0),
             _cmp(cmp_t()),
             alloc(allocator_t()),
             _begin(nullptr),
             _end(nullptr)
         {
             TNULL = new rb_node(nullptr, nullptr, nullptr, rb_black, nullptr);
-//            TNULL->color = rb_black;
-//            TNULL->left = nullptr;
-//            TNULL = nullptr;
+            this->root = TNULL;
+        }
+
+        rb_tree(const cmp_t &cmp, const allocator_t &alloc) :
+            _size(0),
+            _cmp(cmp),
+            alloc(alloc),
+            _begin(nullptr),
+            _end(nullptr)
+        {
+            TNULL = new rb_node(nullptr, nullptr, nullptr, rb_black, nullptr);
             this->root = TNULL;
         }
 
@@ -374,7 +371,7 @@ namespace ft {
             if (d->key)
                 delete d->key;
             delete d;
-            --size;
+            --_size;
         }
 
         int compare(const key_t &lhs, const key_t &rhs) const
@@ -402,8 +399,14 @@ namespace ft {
             postOrderHelper(this->root);
         }
 
-        NodePtr searchTree(int k) {
+        NodePtr searchTree(const key_t &k) const {
             return searchTreeHelper(this->root, k);
+        }
+
+        int find(const key_t &k) const {
+            if (searchTree(k) == TNULL)
+                return 0;
+            return 1;
         }
 
         void    leftRotate(NodePtr x) {
@@ -543,23 +546,30 @@ namespace ft {
             return y;
         }
 
-        void    insert(key_t key) {
-            key_t   *n = new key_t(key);
-            NodePtr node = new rb_node(nullptr, TNULL, TNULL, rb_red, n);
-            ++size;
+        NodePtr insert(const key_t &key) {
+            return insert(root, key);
+        }
 
+        NodePtr insert(NodePtr dst, const key_t &key) {
             NodePtr y = TNULL;
-            NodePtr x = this->root;
+            NodePtr x = dst;
 
             while (x != TNULL) {
                 y = x;
-                if (compare(node->get_key(), x->get_key()) == -1) {
+                if (compare(key, x->get_key()) == -1) {
                     x = x->left;
+                    continue;
                 }
-                else {
+                else if (compare(key, x->get_key()) == 1) {
                     x = x->right;
+                    continue;
                 }
+                return x;
             }
+
+            key_t   *n = new key_t(key);
+            NodePtr node = new rb_node(nullptr, TNULL, TNULL, rb_red, n);
+            ++_size;
 
             node->parent = y;
             if (y == TNULL) {
@@ -572,18 +582,70 @@ namespace ft {
 
             if (node->parent == TNULL) {
                 node->color = rb_black;
-                return;
+                return node;
             }
 
             if (node->parent->parent == TNULL) {
-                return;
+                return node;
             }
 
             insert_fixup(node);
+            return node;
         }
 
-        void    deleteNode(key_t key) {
-            deleteNodeHelper(this->root, key);
+        NodePtr deleteNode(const key_t &key) {
+            return deleteNodeHelper(root, key);
+        }
+
+        NodePtr   deleteNode(NodePtr pos) {
+            return deleteNodeHelper(pos, pos->get_key());
+        }
+
+        void    assign(const rb_tree &other) {
+            if (root != TNULL)
+                delete_branch(root);
+            root = _copy(other.root);
+            _begin = minimum(root);
+            _end = maximum(root);
+            _size = other._size;
+        }
+
+        NodePtr begin() const {
+            return _begin;
+        }
+
+        NodePtr end() const {
+            return _end;
+        }
+
+        std::size_t size() {
+            return _size;
+        }
+
+        void    destroy() {
+            delete_branch(root);
+        }
+
+        void    swap(rb_tree &other) {
+            std::swap(root, other.root);
+            std::swap(_begin, other._begin);
+            std::swap(_end, other._end);
+            std::swap(_size, other._size);
+            std::swap(alloc, other.alloc);
+            std::swap(_cmp, other._cmp);
+            std::swap(TNULL, other.TNULL);
+        }
+
+    private:
+
+        NodePtr _copy(NodePtr cpy) {
+            key_t *k = new key_t(cpy->key);
+            NodePtr new_root = new rb_node(TNULL, TNULL, TNULL, cpy->color, k);
+            if (cpy->left)
+                new_root->left = _copy(cpy->left);
+            if (cpy->right)
+                new_root->right = _copy(cpy->right);
+            return new_root;
         }
     };
 

@@ -68,5 +68,16 @@ namespace ft {
 
     template <typename type_t>
     struct is_iterator : public ft::_is_iterator_base<type_t> {};
+    // --------------------------------- remove_const ------------------------------
+    template <class type_t>
+    struct remove_const {
+        typedef type_t type;
+    };
+
+    template <class type_t>
+    struct remove_const<const type_t>
+    {
+        typedef type_t type;
+    };
 }
 #endif //FT_CONTAINERS_TYPE_TRAITS_HPP

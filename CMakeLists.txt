@@ -24,4 +24,4 @@ add_executable(ft_containers
         stack/stack.cpp stack/stack.hpp
         map/map.cpp map/map.hpp
         pair/pair.cpp pair/pair.hpp
-        rb_tree/rb_tree.cpp rb_tree/rb_tree.hpp)
+        rb_tree/rb_tree.cpp rb_tree/rb_tree.hpp iterator/rb_iterator.cpp iterator/rb_iterator.hpp set/set.cpp set/set.hpp)
