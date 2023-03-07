@@ -12,10 +12,10 @@ namespace ft {
 
     template<typename value_t, typename cmp_t, typename alloc_t>
     class rb_iterator_base :
-            public std::iterator<std::bidirectional_iterator_tag, value_t> {
+            public ft::iterator<ft::bidirectional_iterator_tag, value_t> {
     private:
         typedef ft::bidirectional_iterator_tag tag;
-        typedef typename ft::normal_iterator<ft::bidirectional_iterator_tag, value_t> iterator_traits;
+        typedef typename ft::iterator<ft::bidirectional_iterator_tag, value_t> iterator_traits;
 
     public:
         typedef typename iterator_traits::iterator_category iterator_category;
