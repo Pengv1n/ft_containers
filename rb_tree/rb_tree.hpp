@@ -684,6 +684,23 @@ namespace ft {
 
     private:
 
+        bool    tree_equal(NodePtr a, NodePtr b) const {
+            unsigned int left = 1;
+            unsigned int right = 1;
+
+            if (compare(a->get_key(), b->get_key()) != 0)
+                return false;
+            if (a->left and b->left)
+                left = tree_equal(a->left, b->left);
+            else if (a->left or b->left)
+                return false;
+            if (a->right and b->right)
+                right = tree_equal(a->right, b->right);
+            else if (a->right or b->right)
+                return false;
+            return left and right;
+        }
+
         NodePtr _copy(NodePtr cpy) {
             key_t *k = new key_t(cpy->key);
             NodePtr new_root = new rb_node(TNULL, TNULL, TNULL, cpy->color, k);
@@ -692,6 +709,32 @@ namespace ft {
             if (cpy->right)
                 new_root->right = _copy(cpy->right);
             return new_root;
+        }
+
+        bool    equal(const rb_tree &tree_) const {
+            if (_size != tree_._size)
+                return false;
+            else if (_size == 0 and tree_._size == 0)
+                return true;
+            return tree_equal(root, tree_.root);
+        }
+
+        int compare(const rb_tree &tree_) const {
+            if (_size != tree_._size)
+                return
+        }
+
+    public:
+        friend bool    operator==(
+                const rb_tree &lhs,
+                const rb_tree &rhs) {
+            return lhs.equal(rhs);
+        }
+
+        friend bool    operator!=(
+                const rb_tree &lhs,
+                const rb_tree &rhs) {
+            return not lhs.equal(rhs);
         }
     };
 

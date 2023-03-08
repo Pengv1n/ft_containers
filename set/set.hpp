@@ -506,14 +506,13 @@ namespace ft {
             return tree.get_comp();
         }
 
+        template < class Key, class Compare, class Alloc >
+        friend bool    operator==( const ft::set<Key, Compare, Alloc> &lhs,
+                            const ft::set<Key, Compare, Alloc> &rhs)
+        {
+            return lhs.tree == rhs.tree;
+        }
     };
-
-    template < class Key, class Compare, class Alloc >
-    bool    operator==( const ft::set<Key, Compare, Alloc> &lhs,
-                        const ft::set<Key, Compare, Alloc> &rhs)
-    {
-
-    }
 }
 
 #endif //FT_CONTAINERS_SET_HPP

@@ -13,6 +13,10 @@ namespace ft {
     template<class T>
     const T &max(const T &a, const T &b) { return (a < b) ? b : a; }
 
+    template <class T>
+    int sign(const T &value) {
+        return (T() < value) - (value < T());
+    }
 }
 
 #endif //FT_CONTAINERS_UTILS_HPP
