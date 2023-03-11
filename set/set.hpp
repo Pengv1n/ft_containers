@@ -101,9 +101,8 @@ namespace ft {
          * time O(n*log(n))
          */
         {
-            bool tmp;
             while (first != last) {
-                tree.insert(*first, tmp);
+                tree.insert(*first);
                 ++first;
             }
         }
@@ -158,6 +157,8 @@ namespace ft {
          * time O(1)
          */
         {
+            if (!size())
+                return iterator(tree.end(), true);
             return iterator(tree.begin(), false);
         }
 
@@ -168,6 +169,8 @@ namespace ft {
          * time O(1)
          */
         {
+            if (!size())
+                return const_iterator(tree.end(), true);
             return const_iterator(tree.begin(), false);
         }
 
@@ -337,8 +340,6 @@ namespace ft {
          */
         {
             while (first != last) {
-                if ((first + 1) == last)
-                    return erase(first);
                 tree.deleteNode(*first++);
             }
             return iterator();

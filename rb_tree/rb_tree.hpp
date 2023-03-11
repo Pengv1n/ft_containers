@@ -72,7 +72,6 @@ namespace ft {
         typedef rb_node* NodePtr;
 
         NodePtr root;
-        NodePtr TNULL;
 
         NodePtr     _begin;
         NodePtr     _end;
@@ -91,7 +90,7 @@ namespace ft {
 
         void    preOrderHelper(NodePtr node)
         {
-            if (node != TNULL) {
+            if (node != nullptr) {
                 std::cout << *node->key << " ";
                 preOrderHelper(node->left);
                 preOrderHelper(node->right);
@@ -100,7 +99,7 @@ namespace ft {
 
         void    inOrderHelper(NodePtr node)
         {
-            if (node != TNULL) {
+            if (node != nullptr) {
                 inOrderHelper(node->left);
                 std::cout << *node->key << " ";
                 inOrderHelper(node->right);
@@ -109,16 +108,16 @@ namespace ft {
 
         void    postOrderHelper(NodePtr node)
         {
-            if (node != TNULL) {
+            if (node != nullptr) {
                 postOrderHelper(node->left);
                 postOrderHelper(node->right);
                 std::cout << *node->key << " ";
             }
         }
 
-        NodePtr searchTreeHelper(NodePtr node, const key_t &key)
+        NodePtr searchTreeHelper(NodePtr node, const key_t &key) const
         {
-            if (node == TNULL || key == *(node->key))
+            if (node == nullptr || key == *(node->key))
                 return node;
 
             if (compare(key, node->get_key()) == -1)
@@ -131,7 +130,7 @@ namespace ft {
             while (k->parent->color == rb_red) {
                 if (k->parent == k->parent->parent->right) {
                     u = k->parent->parent->left; // uncle
-                    if (u->color == rb_red) {
+                    if (u != nullptr and u->color == rb_red) {
                         // case 3.1
                         u->color = rb_black;
                         k->parent->color = rb_black;
@@ -151,7 +150,7 @@ namespace ft {
                 } else {
                     u = k->parent->parent->right; // uncle
 
-                    if (u->color == rb_red) {
+                    if (u != nullptr and u->color == rb_red) {
                         // mirror case 3.1
                         u->color = rb_black;
                         k->parent->color = rb_black;
@@ -176,14 +175,15 @@ namespace ft {
         }
 
         void    rbTransplant(NodePtr u, NodePtr v) {
-            if (u->parent == TNULL) {
+            if (u->parent == nullptr) {
                 this->root = v;
             } else if (u == u->parent->left) {
                 u->parent->left = v;
             } else {
                 u->parent->right = v;
             }
-            v->parent = u->parent;
+            if (v != nullptr)
+                v->parent = u->parent;
         }
 
         void    fixDelete(NodePtr x) {
@@ -191,19 +191,21 @@ namespace ft {
             while (x != root && x->color == rb_black) {
                 if (x == x->parent->left) {
                     s = x->parent->right;
-                    if (s->color == rb_red) {
+                    if (s != nullptr and s->color == rb_red) {
                         s->color = rb_black;
                         x->parent->color = rb_red;
                         leftRotate(x->parent);
                         s = x->parent->right;
                     }
 
-                    if (s->left->color == rb_black && s->right->color == rb_black) {
+                    if ((s->left == nullptr or s->left->color == rb_black) &&
+                            (s->right == nullptr or s->right->color == rb_black)) {
                         s->color = rb_red;
                         x = x->parent;
                     } else {
-                        if (s->right->color == rb_black) {
-                            s->left->color = rb_black;
+                        if (s->right == nullptr or s->right->color == rb_black) {
+                            if (s->left != nullptr)
+                                s->left->color = rb_black;
                             s->color = rb_red;
                             rightRotate(s);
                             s = x->parent->right;
@@ -211,25 +213,28 @@ namespace ft {
 
                         s->color = x->parent->color;
                         x->parent->color = rb_black;
-                        s->right->color = rb_black;
+                        if (s->right != nullptr)
+                            s->right->color = rb_black;
                         leftRotate(x->parent);
                         x = this->root;
                     }
                 } else {
                     s = x->parent->left;
-                    if (s->color == rb_red) {
+                    if (s != nullptr and s->color == rb_red) {
                         s->color = rb_black;
                         x->parent->color = rb_red;
                         rightRotate(x->parent);
                         s = x->parent->left;
                     }
 
-                    if (s->right->color == rb_black && s->right->color == rb_black) {
+                    if ((s->left == nullptr or s->left->color == rb_black) &&
+                            (s->right == nullptr or s->right->color == rb_black)) {
                         s->color = rb_red;
                         x = x->parent;
                     } else {
-                        if (s->left->color == rb_black) {
-                            s->right->color = rb_black;
+                        if (s->left == nullptr or s->left->color == rb_black) {
+                            if (s->right != nullptr)
+                                s->right->color = rb_black;
                             s->color = rb_red;
                             leftRotate(s);
                             s = x->parent->left;
@@ -237,7 +242,8 @@ namespace ft {
 
                         s->color = x->parent->color;
                         x->parent->color = rb_black;
-                        s->left->color = rb_black;
+                        if (s->left != nullptr)
+                            s->left->color = rb_black;
                         rightRotate(x->parent);
                         x = this->root;
                     }
@@ -247,9 +253,9 @@ namespace ft {
         }
 
         NodePtr deleteNodeHelper(NodePtr node, const key_t &key) {
-            NodePtr z = TNULL;
+            NodePtr z = nullptr;
             NodePtr x,y;
-            while (node != TNULL) {
+            while (node != nullptr) {
                 if (!compare(node->get_key(), key)) {
                     z = node;
                     break;
@@ -262,25 +268,31 @@ namespace ft {
                 }
             }
 
-            if (z == TNULL) {
+            if (z == nullptr) {
                 std::cout << "Couldn't find key in the tree" << std::endl;
                 return z;
             }
 
             y = z;
             int y_original_color = y->color;
-            if (z->left == TNULL) {
-                x = z->right;
+            if (z->left == nullptr) {
+                if (z->right == nullptr)
+                    x = z->parent;
+                else
+                    x = z->right;
                 rbTransplant(z, z->right);
-            } else if (z->right == TNULL) {
+            } else if (z->right == nullptr) {
                 x = z->left;
                 rbTransplant(z, z->left);
             } else {
                 y = minimum(z->right);
                 y_original_color = y->color;
-                x = y->right;
+                if (y->right == nullptr)
+                    x = y;
+                else
+                    x = y->right;
                 if (y->parent == z) {
-                    x->parent = y;
+//                    x->parent = y;
                 } else {
                     rbTransplant(y, y->right);
                     y->right = z->right;
@@ -297,8 +309,13 @@ namespace ft {
             --_size;
             delete z;
             if (!_size) {
-                this->root = TNULL;
+                _begin = nullptr;
+                _end = nullptr;
+                this->root = nullptr;
                 return ret;
+            } else {
+                _begin = minimum(root);
+                _end = maximum(root);
             }
             if (y_original_color == rb_black) {
                 fixDelete(x);
@@ -308,7 +325,7 @@ namespace ft {
 
         void printHelper(NodePtr _root, std::string indent, bool last) {
             // print the tree structure on the screen
-            if (_root != TNULL) {
+            if (_root != nullptr) {
                 std::cout<<indent;
                 if (last) {
                     std::cout<<"R----";
@@ -340,8 +357,8 @@ namespace ft {
             _begin(nullptr),
             _end(nullptr)
         {
-            TNULL = new rb_node(nullptr, nullptr, nullptr, rb_black, nullptr);
-            this->root = TNULL;
+//            TNULL = new rb_node(nullptr, nullptr, nullptr, rb_black, nullptr);
+            this->root = nullptr;
         }
 
         rb_tree(const cmp_t &cmp, const allocator_t &alloc) :
@@ -351,26 +368,45 @@ namespace ft {
             _begin(nullptr),
             _end(nullptr)
         {
-            TNULL = new rb_node(nullptr, nullptr, nullptr, rb_black, nullptr);
-            this->root = TNULL;
+//            TNULL = new rb_node(nullptr, nullptr, nullptr, rb_black, nullptr);
+            this->root = nullptr;
+        }
+
+        rb_tree(const rb_tree &other) :
+        root(nullptr),
+        _begin(nullptr),
+        _end(nullptr),
+        _cmp(other._cmp),
+        alloc(other.alloc),
+        _size(0)
+        {
+            if (!other._size)
+                return;
+            assign(other);
         }
 
         ~rb_tree() {
-            if (root != TNULL)
-                delete_branch(this->root);
-            delete TNULL;
+            if (root != nullptr)
+                delete_branch(root);
         }
     private:
         void    delete_branch(NodePtr d) {
-            if (d->left != TNULL) {
+            if (d == nullptr)
+                return;
+            if (d->left != nullptr) {
                 delete_branch(d->left);
+                d->left = nullptr;
             }
-            if (d->right != TNULL) {
+            if (d->right != nullptr) {
                 delete_branch(d->right);
+                d->right = nullptr;
             }
-            if (d->key)
+            if (d->key) {
                 delete d->key;
+                d->key = nullptr;
+            }
             delete d;
+            d = nullptr;
             --_size;
         }
 
@@ -400,10 +436,7 @@ namespace ft {
         }
 
         NodePtr searchKey(const key_t &k) const {
-            NodePtr ret = searchTreeHelper(this->root, k);
-            if (ret == TNULL)
-                return nullptr;
-            return ret;
+            return searchTreeHelper(this->root, k);
         }
 
         NodePtr searchTree(const key_t &k) const {
@@ -413,7 +446,7 @@ namespace ft {
         NodePtr lower_bound(const key_t &key) const {
             NodePtr tmp = root;
             NodePtr ret = root;
-            while (tmp != TNULL) {
+            while (tmp != nullptr) {
                 if (compare(tmp->get_key(), key) >= 0) {
                     ret = tmp;
                     tmp = tmp->left;
@@ -430,7 +463,7 @@ namespace ft {
         NodePtr upper_bound(const key_t &key) const {
             NodePtr tmp = root;
             NodePtr ret = root;
-            while (tmp != TNULL) {
+            while (tmp != nullptr) {
                 if (compare(tmp->get_key(), key) > 0) {
                     ret = tmp;
                     tmp = tmp->left;
@@ -450,7 +483,7 @@ namespace ft {
         }
 
         int find(const key_t &k) const {
-            if (searchTree(k) == TNULL)
+            if (searchTree(k) == nullptr)
                 return 0;
             return 1;
         }
@@ -467,7 +500,7 @@ namespace ft {
             NodePtr y = x->right; //Устанавливаем y
             x->right = y->left; //Левое поддерево y становится
                                 // правым поддеревом x
-            if (y->left != TNULL) {
+            if (y->left != nullptr) {
                 y->left->parent = x;
             }
                 /*          |
@@ -478,7 +511,7 @@ namespace ft {
                                 b
                 */
             y->parent = x->parent; //Перенос родителя x в y
-            if (x->parent == TNULL)
+            if (x->parent == nullptr)
                 this->root = y;
 
                 /*          |       |
@@ -515,7 +548,7 @@ namespace ft {
                 */
             NodePtr y = x->left;
             x->left = y->right;
-            if (y->right != TNULL) {
+            if (y->right != nullptr) {
                 y->right->parent = x;
             }
             /*                  |
@@ -526,7 +559,7 @@ namespace ft {
                             b
             */
             y->parent = x->parent; //Перенос родителя x в y
-            if (x->parent == TNULL) {
+            if (x->parent == nullptr) {
                 this->root = y;
             }
             else if (x == x->parent->right) {
@@ -552,40 +585,44 @@ namespace ft {
             */
         }
 
-        NodePtr minimum(NodePtr node) {
-            while (node->left != TNULL) {
+        static NodePtr minimum(NodePtr node) {
+            if (node == nullptr)
+                return node;
+            while (node->left != nullptr) {
                 node = node->left;
             }
             return node;
         }
 
-        NodePtr maximum(NodePtr node) {
-            while (node->right != TNULL) {
+        static NodePtr maximum(NodePtr node) {
+            if (node == nullptr)
+                return node;
+            while (node->right != nullptr) {
                 node = node->right;
             }
             return node;
         }
 
-        NodePtr successor(NodePtr x) {
-            if (x->right != TNULL) {
+        static NodePtr successor(NodePtr x) {
+            if (x->right != nullptr) {
                 return minimum(x->right);
             }
 
             NodePtr y = x->parent;
-            while (y != TNULL && x == y->right) {
+            while (y != nullptr && x == y->right) {
                 x = y;
                 y = y->parent;
             }
             return y;
         }
 
-        NodePtr predecessor(NodePtr x) {
-            if (x->left != TNULL) {
+        static NodePtr predecessor(NodePtr x) {
+            if (x->left != nullptr) {
                 return maximum(x->left);
             }
 
             NodePtr y = x->parent;
-            while (y != TNULL && x == y->left) {
+            while (y != nullptr && x == y->left) {
                 x = y;
                 y = y->parent;
             }
@@ -597,10 +634,10 @@ namespace ft {
         }
 
         NodePtr insert(NodePtr dst, const key_t &key) {
-            NodePtr y = TNULL;
+            NodePtr y = nullptr;
             NodePtr x = dst;
 
-            while (x != TNULL) {
+            while (x != nullptr) {
                 y = x;
                 if (compare(key, x->get_key()) == -1) {
                     x = x->left;
@@ -614,11 +651,20 @@ namespace ft {
             }
 
             key_t   *n = new key_t(key);
-            NodePtr node = new rb_node(nullptr, TNULL, TNULL, rb_red, n);
+            NodePtr node = new rb_node(nullptr, nullptr, nullptr, rb_red, n);
             ++_size;
 
+            if (root == nullptr) {
+                _begin = node;
+                _end = node;
+            } else if (compare(node->get_key(), minimum(root)->get_key()) == -1) {
+                _begin = node;
+            } else if (compare(node->get_key(), maximum(root)->get_key()) == 1) {
+                _end = node;
+            }
+
             node->parent = y;
-            if (y == TNULL) {
+            if (y == nullptr) {
                 this->root = node;
             } else if (compare(node->get_key(), y->get_key()) == -1) {
                 y->left = node;
@@ -626,16 +672,18 @@ namespace ft {
                 y->right = node;
             }
 
-            if (node->parent == TNULL) {
+            if (node->parent == nullptr) {
                 node->color = rb_black;
                 return node;
             }
 
-            if (node->parent->parent == TNULL) {
+            if (node->parent->parent == nullptr) {
                 return node;
             }
 
             insert_fixup(node);
+            _begin = minimum(root);
+            _end = maximum(root);
             return node;
         }
 
@@ -648,7 +696,7 @@ namespace ft {
         }
 
         void    assign(const rb_tree &other) {
-            if (root != TNULL)
+            if (root != nullptr)
                 delete_branch(root);
             root = _copy(other.root);
             _begin = minimum(root);
@@ -664,12 +712,15 @@ namespace ft {
             return _end;
         }
 
-        std::size_t size() {
+        std::size_t size() const {
             return _size;
         }
 
         void    destroy() {
             delete_branch(root);
+            root = nullptr;
+            _begin = nullptr;
+            _end = nullptr;
         }
 
         void    swap(rb_tree &other) {
@@ -679,7 +730,6 @@ namespace ft {
             std::swap(_size, other._size);
             std::swap(alloc, other.alloc);
             std::swap(_cmp, other._cmp);
-            std::swap(TNULL, other.TNULL);
         }
 
     private:
@@ -702,12 +752,16 @@ namespace ft {
         }
 
         NodePtr _copy(NodePtr cpy) {
-            key_t *k = new key_t(cpy->key);
-            NodePtr new_root = new rb_node(TNULL, TNULL, TNULL, cpy->color, k);
-            if (cpy->left)
+            key_t *k = new key_t(cpy->get_key());
+            NodePtr new_root = new rb_node(nullptr, nullptr, nullptr, cpy->color, k);
+            if (cpy->left) {
                 new_root->left = _copy(cpy->left);
-            if (cpy->right)
+                new_root->left->parent = new_root;
+            }
+            if (cpy->right) {
                 new_root->right = _copy(cpy->right);
+                new_root->right->parent = new_root;
+            }
             return new_root;
         }
 
@@ -719,9 +773,29 @@ namespace ft {
             return tree_equal(root, tree_.root);
         }
 
+        int _compare(NodePtr rt1, NodePtr rt2, NodePtr end1, NodePtr end2) const {
+            while (true) {
+                int cmp = compare(rt1->get_key(), rt2->get_key());
+                if (cmp)
+                    return cmp;
+                if (rt1 == end1 or rt2 == end2) {
+                    if (rt1 == end1 and rt2 == end2)
+                        return 0;
+                    if (rt1 == end1)
+                        return -1;
+                    return 1;
+                }
+                rt1 = successor(rt1);
+                rt2 = successor(rt2);
+            }
+        }
+
         int compare(const rb_tree &tree_) const {
             if (_size != tree_._size)
-                return
+                return _size > tree_._size ? _size - tree_._size : tree_._size - _size;
+            else if (_size == 0 and tree_._size == 0)
+                return 0;
+            return _compare(root, tree_.root, end(), tree_.end());
         }
 
     public:
@@ -736,6 +810,27 @@ namespace ft {
                 const rb_tree &rhs) {
             return not lhs.equal(rhs);
         }
+
+        friend bool operator>(const rb_tree &lhs,
+                              const rb_tree &rhs) {
+            return lhs.compare(rhs) > 0;
+        }
+
+        friend bool operator>=(const rb_tree &lhs,
+                              const rb_tree &rhs) {
+            return lhs.compare(rhs) >= 0;
+        }
+
+        friend bool operator<(const rb_tree &lhs,
+                              const rb_tree &rhs) {
+            return lhs.compare(rhs) < 0;
+        }
+
+        friend bool operator<=(const rb_tree &lhs,
+                              const rb_tree &rhs) {
+            return lhs.compare(rhs) <= 0;
+        }
+
     };
 
 }

@@ -76,15 +76,17 @@ namespace ft {
                 _end = false;
             else
                 ptr = tree_type::successor(ptr);
-            if (ptr->parent == nullptr)
+            if (ptr == nullptr)
                 _end = true;
         }
 
-        void decrement() {
+        void decrement(bool rev_flag = false) {
             if (_end)
                 _end = false;
             else
                 ptr = tree_type::predecessor(ptr);
+            if (rev_flag and ptr == nullptr)
+                _end = true;
         }
     };
 
@@ -168,13 +170,13 @@ namespace ft {
         ~rb_reverse_iterator() {}
 
         rb_reverse_iterator &operator++() {
-            this->decrement();
+            this->decrement(true);
             return *this;
         }
 
         const rb_reverse_iterator operator++(int) {
             rb_reverse_iterator ret(*this);
-            this->decrement();
+            this->decrement(true);
             return ret;
         }
 
