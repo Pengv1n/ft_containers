@@ -58,6 +58,24 @@ namespace ft {
                 return *key;
             }
 
+            bool isOnLeft() { return this == parent->left; }
+
+            bool hasRedChild() {
+                return (left != nullptr and left->color == rb_red) or
+                (right != nullptr and right->color == rb_red);
+            }
+
+            rb_node *sibling() {
+                // sibling null if no parent
+                if (parent == nullptr)
+                    return nullptr;
+
+                if (isOnLeft())
+                    return parent->right;
+
+                return parent->left;
+            }
+
             rb_node     *parent;
             rb_node     *left;
             rb_node     *right;
@@ -252,9 +270,169 @@ namespace ft {
             x->color = rb_black;
         }
 
+        NodePtr BSTreplace(NodePtr x) {
+            // when node have 2 children
+            if (x->left != nullptr and x->right != nullptr)
+                return successor(x->right);
+
+            // when leaf
+            if (x->left == NULL and x->right == NULL)
+                return nullptr;
+
+            // when single child
+            if (x->left != nullptr)
+                return x->left;
+            else
+                return x->right;
+        }
+
+        void fixDoubleBlack(NodePtr x) {
+            if (x == root)
+                // Reached root
+                return;
+
+            NodePtr sibling = x->sibling(), parent = x->parent;
+            if (sibling == nullptr) {
+                // No sibiling, double black pushed up
+                fixDoubleBlack(parent);
+            } else {
+                if (sibling->color == rb_red) {
+                    // Sibling red
+                    parent->color = rb_red;
+                    sibling->color = rb_black;
+                    if (sibling->isOnLeft()) {
+                        // left case
+                        rightRotate(parent);
+                    } else {
+                        // right case
+                        leftRotate(parent);
+                    }
+                    fixDoubleBlack(x);
+                } else {
+                    // Sibling black
+                    if (sibling->hasRedChild()) {
+                        // at least 1 red children
+                        if (sibling->left != nullptr and sibling->left->color == rb_red) {
+                            if (sibling->isOnLeft()) {
+                                // left left
+                                sibling->left->color = sibling->color;
+                                sibling->color = parent->color;
+                                rightRotate(parent);
+                            } else {
+                                // right left
+                                sibling->left->color = parent->color;
+                                rightRotate(sibling);
+                                leftRotate(parent);
+                            }
+                        } else {
+                            if (sibling->isOnLeft()) {
+                                // left right
+                                sibling->right->color = parent->color;
+                                leftRotate(sibling);
+                                rightRotate(parent);
+                            } else {
+                                // right right
+                                sibling->right->color = sibling->color;
+                                sibling->color = parent->color;
+                                leftRotate(parent);
+                            }
+                        }
+                        parent->color = rb_black;
+                    } else {
+                        // 2 black children
+                        sibling->color = rb_red;
+                        if (parent->color == rb_black)
+                            fixDoubleBlack(parent);
+                        else
+                            parent->color = rb_black;
+                    }
+                }
+            }
+        }
+
+        void swapValues(NodePtr u, NodePtr v) {
+            key_t *temp;
+            temp = u->key;
+            u->key = v->key;
+            v->key = temp;
+        }
+
+        void deleteNode_(NodePtr v) {
+            NodePtr u = BSTreplace(v);
+            // True when u and v are both black
+            bool uvBlack = ((u == nullptr or u->color == rb_black) and (v->color == rb_black));
+            NodePtr parent = v->parent;
+
+            if (u == nullptr) {
+                // u is NULL therefore v is leaf
+                if (v == root) {
+                    // v is root, making root null
+                    root = nullptr;
+                } else {
+                    if (uvBlack) {
+                        // u and v both black
+                        // v is leaf, fix double black at v
+                        fixDoubleBlack(v);
+                    } else {
+                        // u or v is red
+                        if (v->sibling() != nullptr)
+                            // sibling is not null, make it red"
+                            v->sibling()->color = rb_red;
+                    }
+
+                    // delete v from the tree
+                    if (v->isOnLeft()) {
+                        parent->left = nullptr;
+                    } else {
+                        parent->right = nullptr;
+                    }
+                }
+                --_size;
+                delete v->key;
+                delete v;
+                return;
+            }
+
+            if (v->left == nullptr or v->right == nullptr) {
+                // v has 1 child
+                if (v == root) {
+                    // v is root, assign the value of u to v, and delete u
+                    *v->key = *u->key;
+                    v->left = u->left;
+                    v->right = u->right;
+                    --_size;
+                    delete u->key;
+                    delete u;
+                } else {
+                    // Detach v from tree and move u up
+                    if (v->isOnLeft()) {
+                        parent->left = u;
+                    } else {
+                        parent->right = u;
+                    }
+                    --_size;
+                    delete v->key;
+                    delete v;
+                    u->parent = parent;
+                    if (uvBlack) {
+                        // u and v both black, fix double black at u
+                        fixDoubleBlack(u);
+                    } else {
+                        // u or v red, color u black
+                        u->color = rb_black;
+                    }
+                }
+                return;
+            }
+
+            // v has 2 children, swap values with successor and recurse
+            swapValues(u, v);
+            deleteNode_(u);
+        }
+
         NodePtr deleteNodeHelper(NodePtr node, const key_t &key) {
             NodePtr z = nullptr;
-            NodePtr x,y;
+            NodePtr x, y;
             while (node != nullptr) {
                 if (!compare(node->get_key(), key)) {
                     z = node;
@@ -272,6 +450,8 @@ namespace ft {
                 std::cout << "Couldn't find key in the tree" << std::endl;
                 return z;
             }
+//            NodePtr ret = successor(z);
+//            deleteNode_(z);
 
             y = z;
             int y_original_color = y->color;
