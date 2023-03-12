@@ -5,7 +5,6 @@
 #ifndef FT_CONTAINERS_TYPE_TRAITS_HPP
 #define FT_CONTAINERS_TYPE_TRAITS_HPP
 
-#include <uchar.h>
 #include "defs.hpp"
 
 namespace ft {
