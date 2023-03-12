@@ -37,9 +37,9 @@ namespace ft {
                 class T,
                 class Compare = std::less<Key>,
                 class Allocator = std::allocator<ft::pair<const Key, T> >
-    > class map : set <
-            ft::pair<Key, T>,
-            ft::pair_key_compare<Compare, pair<Key, T> >,
+    > class map : public set <
+            ft::pair<const Key, T>,
+            ft::pair_key_compare<Compare, pair<const Key, T> >,
             Allocator,
             ft::pair<int, int> >
     {
@@ -89,11 +89,93 @@ namespace ft {
         typedef set <
                 value_type,
                 value_compare,
-                allocator_type
+                allocator_type,
+                ft::pair<int, int>
         >   base_class;
-        typedef typename iterator::rb_node tree_node;
-        typedef
+        typedef typename iterator::rb_node                  tree_node;
+        typedef ft::pair<iterator, bool>                    insert_pair;
+        typedef ft::pair<iterator, iterator>                range_pair;
+        typedef ft::pair<const_iterator, const_iterator>    const_range_pair;
 
+        mapped_type _dummy_val;
+    public:
+        map() : base_class()
+        {}
+
+        explicit map(const key_compare &comp,
+            const allocator_type &alloc=allocator_type()) :
+            base_class(value_compare(comp), alloc)
+        {}
+
+        template <class InputIt>
+        map(
+                InputIt first,
+                InputIt last,
+                const key_compare &comp=key_compare(),
+                const allocator_type &alloc=allocator_type()) :
+                base_class(first, last, value_compare(comp), alloc)
+        {}
+
+        map(const map &cpy) : base_class(cpy)
+        {}
+
+        mapped_type &at(const key_type &key) const {
+            return _at(key);
+        }
+
+        mapped_type &operator[](const key_type &key) {
+            return this->tree.insert(
+                    value_type(key, mapped_type())
+                    )->get_key().second;
+        }
+
+        size_type   count(const key_type &key) const {
+            return base_class::count(value_type(key, _dummy_val));
+        }
+
+        iterator    find(const key_type &key) {
+            return base_class::find(value_type(key, _dummy_val));
+        }
+
+        range_pair  equal_range(const key_type &key) {
+            return range_pair(lower_bound(key), upper_bound(key));
+        }
+
+        const_range_pair    equal_range(const key_type &key) const {
+            return const_range_pair(lower_bound(key), upper_bound(key));
+        }
+
+        iterator lower_bound(const key_type &key)
+        {
+            return base_class::lower_bound(value_type(key, _dummy_val));
+        }
+
+        const_iterator lower_bound(const key_type &key) const
+        {
+            return base_class::lower_bound(value_type(key, _dummy_val));
+        }
+
+// -----------------------------------------------------------------------------
+        iterator upper_bound(const key_type &key)
+        {
+            return base_class::upper_bound(value_type(key, _dummy_val));
+        }
+
+// -----------------------------------------------------------------------------
+        const_iterator upper_bound(const key_type &key) const
+        {
+            return base_class::upper_bound(value_type(key, _dummy_val));
+        }
+
+    private:
+        mapped_type &_at(const key_type &key) const {
+            tree_node *nd = reinterpret_cast<tree_node *>(
+                    this->tree.find(value_type(key, _dummy_val))
+            );
+            if (nd == nullptr)
+                throw std::out_of_range("map::at()");
+            return nd->get_key().second;
+        }
     };
 
 }

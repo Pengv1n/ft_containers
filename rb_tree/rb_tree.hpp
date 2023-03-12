@@ -135,7 +135,7 @@ namespace ft {
 
         NodePtr searchTreeHelper(NodePtr node, const key_t &key) const
         {
-            if (node == nullptr || key == *(node->key))
+            if (node == nullptr || key == node->get_key())
                 return node;
 
             if (compare(key, node->get_key()) == -1)

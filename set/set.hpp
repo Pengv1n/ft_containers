@@ -62,7 +62,6 @@ namespace ft {
 
         typedef typename iterator::rb_node tree_node;
 
-    private:
         tree_type   tree;
     public:
 
