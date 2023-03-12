@@ -163,20 +163,20 @@ TEST_F(IntSet100, erase_key) {
     EXPECT_EQ(data->empty(), true);
 }
 
-//TEST(RANDOM_INSERT_DELETE, test) {
-//    std::vector<int>    tmp;
-//    ft::set<int>    a;
-//    int i = -1;
-//    const int N = 10;
-//
-//    while (++i < N) {
-//        int k = std::rand();
-//        a.insert(k);
-//        tmp.push_back(k);
-//    }
-//
-//    EXPECT_EQ(a.size(), N);
-//
+TEST(RANDOM_INSERT_DELETE, test) {
+    std::vector<int>    tmp;
+    ft::set<int>    a;
+    int i = -1;
+    const int N = 10;
+
+    while (++i < N) {
+        int k = std::rand();
+        a.insert(k);
+        tmp.push_back(k);
+    }
+
+    EXPECT_EQ(a.size(), N);
+
 //    i = N;
 //    while (--i > 0) {
 //        int s = static_cast<int>(tmp.size()) / 2;
@@ -184,8 +184,8 @@ TEST_F(IntSet100, erase_key) {
 //        tmp.erase(tmp.begin() + s);
 //        EXPECT_EQ(a.size(), i);
 //    }
-//
-//}
+
+}
 
 TEST_F(IntSet100, count) {
     for (int i = 0; i < 2*S; ++i) {

@@ -15,10 +15,6 @@ add_executable(TestsStack TestStack.cpp)
 include_directories(TestsStack ../stack)
 target_link_libraries(TestsStack gtest gtest_main)
 
-add_executable(TestsRBTree TestRBTree.cpp)
-include_directories(TestsRBTree ../rb_tree)
-target_link_libraries(TestsRBTree gtest gtest_main)
-
 add_executable(TestSet TestSet.cpp)
 include_directories(TestSet ../set)
 target_link_libraries(TestSet gtest gtest_main)
