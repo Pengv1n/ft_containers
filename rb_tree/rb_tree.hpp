@@ -135,10 +135,10 @@ namespace ft {
 
         NodePtr searchTreeHelper(NodePtr node, const key_t &key) const
         {
-            if (node == nullptr || key == node->get_key())
+            if (node == nullptr || compare_key(key, node->get_key()) == 0)
                 return node;
 
-            if (compare(key, node->get_key()) == -1)
+            if (compare_key(key, node->get_key()) == -1)
                 return searchTreeHelper(node->left, key);
             return searchTreeHelper(node->right, key);
         }
@@ -434,12 +434,12 @@ namespace ft {
             NodePtr z = nullptr;
             NodePtr x, y;
             while (node != nullptr) {
-                if (!compare(node->get_key(), key)) {
+                if (!compare_key(node->get_key(), key)) {
                     z = node;
                     break;
                 }
 
-                if (compare(node->get_key(), key) == -1) {
+                if (compare_key(node->get_key(), key) == -1) {
                     node = node->right;
                 } else {
                     node = node->left;
@@ -590,7 +590,7 @@ namespace ft {
             --_size;
         }
 
-        int compare(const key_t &lhs, const key_t &rhs) const
+        int compare_key(const key_t &lhs, const key_t &rhs) const
         {
             if (_cmp(lhs, rhs))
                 return -1;
@@ -627,31 +627,31 @@ namespace ft {
             NodePtr tmp = root;
             NodePtr ret = root;
             while (tmp != nullptr) {
-                if (compare(tmp->get_key(), key) >= 0) {
+                if (compare_key(tmp->get_key(), key) >= 0) {
                     ret = tmp;
                     tmp = tmp->left;
                 } else {
                     tmp = tmp->right;
                 }
-                if (compare(ret->get_key(), key) == 0) {
+                if (compare_key(ret->get_key(), key) == 0) {
                     return ret;
                 }
             }
-            return compare(ret->get_key(), key) < 0 ? nullptr : ret;
+            return compare_key(ret->get_key(), key) < 0 ? nullptr : ret;
         }
 
         NodePtr upper_bound(const key_t &key) const {
             NodePtr tmp = root;
             NodePtr ret = root;
             while (tmp != nullptr) {
-                if (compare(tmp->get_key(), key) > 0) {
+                if (compare_key(tmp->get_key(), key) > 0) {
                     ret = tmp;
                     tmp = tmp->left;
                 } else {
                     tmp = tmp->right;
                 }
             }
-            return compare(ret->get_key(), key) <= 0 ? nullptr : ret;
+            return compare_key(ret->get_key(), key) <= 0 ? nullptr : ret;
         }
 
         cmp_t   get_comp() const {
@@ -819,11 +819,11 @@ namespace ft {
 
             while (x != nullptr) {
                 y = x;
-                if (compare(key, x->get_key()) == -1) {
+                if (compare_key(key, x->get_key()) == -1) {
                     x = x->left;
                     continue;
                 }
-                else if (compare(key, x->get_key()) == 1) {
+                else if (compare_key(key, x->get_key()) == 1) {
                     x = x->right;
                     continue;
                 }
@@ -837,16 +837,16 @@ namespace ft {
             if (root == nullptr) {
                 _begin = node;
                 _end = node;
-            } else if (compare(node->get_key(), minimum(root)->get_key()) == -1) {
+            } else if (compare_key(node->get_key(), minimum(root)->get_key()) == -1) {
                 _begin = node;
-            } else if (compare(node->get_key(), maximum(root)->get_key()) == 1) {
+            } else if (compare_key(node->get_key(), maximum(root)->get_key()) == 1) {
                 _end = node;
             }
 
             node->parent = y;
             if (y == nullptr) {
                 this->root = node;
-            } else if (compare(node->get_key(), y->get_key()) == -1) {
+            } else if (compare_key(node->get_key(), y->get_key()) == -1) {
                 y->left = node;
             } else {
                 y->right = node;
@@ -918,7 +918,7 @@ namespace ft {
             unsigned int left = 1;
             unsigned int right = 1;
 
-            if (compare(a->get_key(), b->get_key()) != 0)
+            if (compare_key(a->get_key(), b->get_key()) != 0)
                 return false;
             if (a->left and b->left)
                 left = tree_equal(a->left, b->left);
@@ -955,7 +955,7 @@ namespace ft {
 
         int _compare(NodePtr rt1, NodePtr rt2, NodePtr end1, NodePtr end2) const {
             while (true) {
-                int cmp = compare(rt1->get_key(), rt2->get_key());
+                int cmp = compare_key(rt1->get_key(), rt2->get_key());
                 if (cmp)
                     return cmp;
                 if (rt1 == end1 or rt2 == end2) {

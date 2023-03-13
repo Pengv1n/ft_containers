@@ -11,10 +11,10 @@
 
 int main()
 {
-    ft::map<int, int>    a;
+    std::map<int, int>    a;
 
-    a[45] = 34;
+    for (int i = 0; i < 234; ++i)
+        a.insert(std::pair<int ,int>(i, i));
 
-    std::cout << a.find(45).get_node()->get_key().second;
     return 0;
 }

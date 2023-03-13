@@ -5,6 +5,8 @@
 #ifndef FT_CONTAINERS_PAIR_HPP
 #define FT_CONTAINERS_PAIR_HPP
 
+#include <algorithm>
+
 namespace ft {
 
     template <
@@ -14,17 +16,17 @@ namespace ft {
         typedef T1  first_type;
         typedef T2  second_type;
 
-        T1  first;
-        T2  second;
+        first_type  first;
+        second_type second;
 
         pair() : first(), second()
         {}
 
-        pair(const T1 &x, const T2 &y) : first(x), second(y)
+        pair(const first_type &x, const second_type &y) : first(x), second(y)
         {}
 
         template<class U1, class U2>
-        explicit pair(const pair<U1, U2> &p) : first(p.first), second(p.second)
+        pair(const pair<U1, U2> &p) : first(p.first), second(p.second)
         {}
 
         ~pair() {}
@@ -34,6 +36,18 @@ namespace ft {
             first = a.first;
             second = a.second;
             return *this;
+        }
+
+        template<class U1, class U2>
+        pair    &operator=(const pair<U1, U2> &other) {
+            first = other.first;
+            second = other.second;
+            return *this;
+        }
+
+        void    swap(pair &other) {
+            std::swap(first, other.first);
+            std::swap(second, other.second);
         }
     };
 

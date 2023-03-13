@@ -18,3 +18,7 @@ target_link_libraries(TestsStack gtest gtest_main)
 add_executable(TestSet TestSet.cpp)
 include_directories(TestSet ../set)
 target_link_libraries(TestSet gtest gtest_main)
+
+add_executable(TestMap TestMap.cpp)
+include_directories(TestMap ../map)
+target_link_libraries(TestMap gtest gtest_main)

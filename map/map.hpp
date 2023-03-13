@@ -5,9 +5,7 @@
 #ifndef FT_CONTAINERS_MAP_HPP
 #define FT_CONTAINERS_MAP_HPP
 
-#include "defs.hpp"
 #include <functional>
-#include <iostream>
 #include "pair.hpp"
 #include "set.hpp"
 
@@ -39,7 +37,7 @@ namespace ft {
                 class Allocator = std::allocator<ft::pair<const Key, T> >
     > class map : public set <
             ft::pair<const Key, T>,
-            ft::pair_key_compare<Compare, pair<const Key, T> >,
+            ft::pair_key_compare<Compare, ft::pair<const Key, T> >,
             Allocator,
             ft::pair<int, int> >
     {
@@ -155,13 +153,11 @@ namespace ft {
             return base_class::lower_bound(value_type(key, _dummy_val));
         }
 
-// -----------------------------------------------------------------------------
         iterator upper_bound(const key_type &key)
         {
             return base_class::upper_bound(value_type(key, _dummy_val));
         }
 
-// -----------------------------------------------------------------------------
         const_iterator upper_bound(const key_type &key) const
         {
             return base_class::upper_bound(value_type(key, _dummy_val));
@@ -169,9 +165,8 @@ namespace ft {
 
     private:
         mapped_type &_at(const key_type &key) const {
-            tree_node *nd = reinterpret_cast<tree_node *>(
-                    this->tree.find(value_type(key, _dummy_val))
-            );
+            tree_node *nd =
+                    base_class::find(value_type(key, _dummy_val)).get_node();
             if (nd == nullptr)
                 throw std::out_of_range("map::at()");
             return nd->get_key().second;
