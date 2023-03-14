@@ -91,6 +91,8 @@ namespace ft {
             memory O(size)
         */
         {
+            if (!count)
+                return;
             if (count < _S_max_size(alloc))
                 _init(count, false);
             else

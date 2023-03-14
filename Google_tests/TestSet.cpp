@@ -178,7 +178,7 @@ TEST(RANDOM_INSERT_DELETE, test) {
     EXPECT_EQ(a.size(), N);
 
 //    i = N;
-//    while (--i > 0) {
+//    while (-/-i > 0) {
 //        int s = static_cast<int>(tmp.size()) / 2;
 //        a.erase(tmp[s]);
 //        tmp.erase(tmp.begin() + s);
