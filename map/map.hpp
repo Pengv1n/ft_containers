@@ -165,11 +165,11 @@ namespace ft {
 
     private:
         mapped_type &_at(const key_type &key) const {
-            tree_node *nd =
-                    base_class::find(value_type(key, _dummy_val)).get_node();
-            if (nd == nullptr)
-                throw std::out_of_range("map::at()");
-            return nd->get_key().second;
+            const_iterator nd =
+                    base_class::find(value_type(key, _dummy_val));
+            if (nd.is_end())
+                throw std::out_of_range("ft::map::at()");
+            return nd.get_node()->get_key().second;
         }
     };
 

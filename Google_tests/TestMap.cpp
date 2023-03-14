@@ -108,10 +108,38 @@ TEST_F(IntMap100, operator_assign) {
 }
 
 TEST_F(IntMap100, at) {
-    EXPECT_EQ(data->at(1), 1);
-    data->at(1) = 34;
-    EXPECT_EQ(data->at(1), 34);
+    for (int i = 0; i < S; ++i) {
+        EXPECT_EQ(data->at(i), i);
+    }
+    EXPECT_EQ(data->size(), S);
 
+    for (int i = 0; i < S; ++i) {
+        data->at(i) = i + S;
+        EXPECT_EQ(data->at(i), i + S);
+    }
+    EXPECT_EQ(data->size(), S);
+
+    ft::map<int, int>::iterator iter = data->begin();
+    for (int i = S; i < 2*S; ++i, ++iter) {
+        EXPECT_EQ((*iter).first, i - S);
+        EXPECT_EQ((*iter).second, i);
+    }
+    EXPECT_EQ(data->size(), S);
+
+    EXPECT_THROW(data->at(S), std::out_of_range);
+}
+
+TEST_F(IntMap100, square_brackets) {
+    for (int i = 0; i < S; ++i) {
+        EXPECT_EQ((*data)[i], i);
+    }
+    EXPECT_EQ(data->size(), S);
+    EXPECT_THROW(data->at(2 * S), std::out_of_range);
+    EXPECT_EQ((*data)[2 * S], int());
+
+    (*data)[2 * S] = 3*S;
+    EXPECT_EQ((*data)[2*S], 3*S);
+    EXPECT_EQ(data->size(), S + 1);
 }
 
 int main(int argc, char *argv[])

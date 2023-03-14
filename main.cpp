@@ -11,10 +11,12 @@
 
 int main()
 {
-    std::map<int, int>    a;
+    ft::map<int, int>    a;
 
     for (int i = 0; i < 234; ++i)
-        a.insert(std::pair<int ,int>(i, i));
+        a.insert(ft::pair<int ,int>(i, i));
+
+    a.at(234);
 
     return 0;
 }
